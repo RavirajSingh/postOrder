@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+        <property name="dataSource" ref="jdbcDataSource"/>
+    </bean>
+
+    <bean id="jdbcDataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="shutdown">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/myntra_lms"/>
+        <property name="username" value="root"/>
+        <property name="password" value=""/>
+        <property name="idleTimeout" value="200"/>
+        <property name="maximumPoolSize" value="5"/>
+        <property name="connectionTimeout" value="30000"/>
+        <property name="validationTimeout" value="5000"/>
+        <property name="initializationFailFast" value="true"/>
+        <property name="maxLifetime" value="1800000"/>
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="test-jpa"/>
+        <property name="dataSource" ref="jdbcDataSource"/>
+        <property name="jpaDialect" ref="hibernateJpaDialect"/>
+        <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>
+    </bean>
+
+    <bean id="hibernateJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="true"/>
+        <property name="generateDdl" value="false"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.MySQLDialect"/>
+    </bean>
+
+    <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor">
+        <property name="defaultPersistenceUnitName" value="test-jpa"/>
+    </bean>
+
+</beans>

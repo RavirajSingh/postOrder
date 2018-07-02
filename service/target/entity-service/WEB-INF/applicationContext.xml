@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:cxf="http://cxf.apache.org/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+       http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+       http://www.springframework.org/schema/cache
+       http://www.springframework.org/schema/cache/spring-cache.xsd
+       http://www.springframework.org/schema/data/jpa
+       http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+    <!--Spring Data Repository-->
+    <jpa:repositories base-package="repository"/>
+
+    <jaxrs:server id="restServer" address="/">
+        <jaxrs:serviceBeans>
+            <ref bean="userService"/>
+        </jaxrs:serviceBeans>
+        <jaxrs:extensionMappings>
+            <entry key="json" value="application/json"/>
+            <entry key="xml" value="application/xml"/>
+        </jaxrs:extensionMappings>
+        <jaxrs:features>
+            <cxf:logging/>
+        </jaxrs:features>
+        <jaxrs:providers>
+            <ref bean="jacksonProvider"/>
+        </jaxrs:providers>
+    </jaxrs:server>
+    <bean id="jacksonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+    <bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider"/>
+
+    <bean id="userService" class="service.impl.UserServiceImpl">
+        <constructor-arg ref="rabbitMsgPublisher"/>
+        <constructor-arg ref="userManager"/>
+    </bean>
+    <bean id="rabbitMsgPublisher" class="utils.RabbitMsgPublisher">
+        <constructor-arg ref="rabbitTemplate"/>
+    </bean>
+    <bean id="userManager" class="manager.UserManager">
+        <constructor-arg ref="userRepository"/>
+    </bean>
+</beans>
